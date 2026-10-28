@@ -1,6 +1,6 @@
 # create-port
 
-**Create, ported to Horizon.** A clean-room rewrite of the [Create](https://www.curseforge.com/minecraft/mc-mods/create)
+**Create, ported to Horizon.** A rewrite of the [Create](https://www.curseforge.com/minecraft/mc-mods/create)
 mod for [Horizon](https://playhorizon.dev/) — Minecraft: Java Edition 26.3 rebuilt in Rust — targeting Horizon's
 own mod system: Rust crates compiled to sandboxed WebAssembly components (`.hmod`).
 
@@ -9,9 +9,38 @@ and Horizon has none. So Create is not *loaded* here — it is **rewritten**, su
 Horizon's versioned mod API.
 
 Unofficial. Not affiliated with Mojang, Microsoft, the Create team or the Horizon project.
-Create is © simibubi and the Create team (MIT). Horizon's original work is MIT.
 
 ---
+
+## Licence: what we may take
+
+Create is open source, but its [`LICENSE.md`](https://github.com/Creators-of-Create/Create/blob/mc1.21.1/dev/LICENSE.md)
+splits the mod in two, and the split decides the shape of this port:
+
+| Part | Licence | Consequence for us |
+| --- | --- | --- |
+| **Code** — everything outside `src/main/resources/assets/` | **MIT** © The Create Team | we may read it, translate it to Rust and publish the derivative, with attribution in our `LICENSE` and in `ported-from` of each mod's manifest |
+| **Assets** — `src/main/resources/assets/`: models, textures, blockstates, sounds, lang | **All Rights Reserved** | we may **not** copy or redistribute them; they have to come from the player's own Create install |
+
+So the code port is a translation job with no legal ambiguity. Assets are the real constraint, and there is a
+working precedent for it: **Create: Adapted**, the community adaptation of Create for Minecraft 26.x, publishes
+`create-adapted-…-public-external-assets.jar` — its own code, with assets resolved at runtime from a separately
+installed official Create. That is the model for M1: `create-content.hmod` declares the blocks and items and
+**references** assets the player already has, or ships only assets we make ourselves.
+
+Upstream, Horizon applies a stricter rule to its own modpack ports — *a mod's code is never decompiled, read,
+quoted or paraphrased* — because most mods in All the Mods 10 are ARR, and because they pulled their shader packs
+in October 2026 for exactly that contamination. That rule is Horizon's, and Create's MIT licence does not impose
+it on us. Two consequences we accept:
+
+- The port lives in **this** repository, where reading Create's source is legitimate. If a port is ever offered to
+  Horizon's registry or its `horizon-port-pack` pipeline, that contribution is re-derived under their clean-room
+  rule, or cleared with the maintainer first.
+- We keep the *behavioural* discipline anyway, because it is what makes a port trustworthy: every subsystem gets a
+  harness running the real Create in a dev Java instance against this port — same inputs, compared outputs. The
+  source tells you the intent; the harness proves the result.
+
+Never commit Create's assets, its jars, or decompiler output into this repo (see `.gitignore`).
 
 ## Why this is hard (read before writing code)
 
@@ -43,38 +72,29 @@ client overlay for anything it must not (RPM, stress, rotation direction). Horiz
 like this *an API gap*, and gaps become issues upstream — this port is expected to file them, and to shrink as
 they close.
 
-## Clean-room rule
+## Version target
 
-Horizon's own rule for ports, and this repo's hard rule:
+Create's official releases stop at **`6.0.10+mc1.21.1`** (NeoForge, April 2026); there is no official Create for
+Minecraft 26.x, and Horizon pins **26.3**. So the port bridges a version gap as well as an API gap:
 
-> A mod's code is never decompiled, read, quoted or paraphrased. Ports are written from the mod's observed
-> behaviour, its own data files and its public documentation only.
-
-Concretely, in this repo:
-
-- **Never** open, read, summarise or paste Create's Java source — not the jar, not the GitHub repo, not a
-  decompiler's output, not an AI summary of it. This includes "just to check how they did it".
-- **Do** run Create in a dev Java instance and observe it (`oracle/`): what a block does, what it renders, what
-  it prints, what its screens show, what NBT it stores.
-- **Do** read Create's own data files (its `data/` and `assets/` — models, blockstates, recipes, loot, lang,
-  textures) and the [Create Wiki](https://create.fandom.com/) and other public documentation, where the formulas
-  (RPM sources, stress costs, gear ratios, processing times) are published.
-- **Do** write a harness per subsystem: the real Create mod in the dev oracle vs this port, same inputs, compared
-  outputs. A subsystem is done when the harness says the two agree — not when it looks right.
-
-Assets carried over from Create's jar stay under Create's licence with attribution; per-file licence status is
-checked in M0 before anything ships.
+- the **oracle** for harnesses runs Create 6.0.10 on NeoForge 1.21.1 — that is the behaviour we match;
+- block, item, recipe, loot and data-pack **formats** must be 26.3's, as Horizon reads them (its
+  `horizon-port-pack carry` step already converts carried data to the current formats);
+- where 1.21.1 and 26.3 disagree on vanilla behaviour, 26.3 wins — that is the game we run in.
 
 ## Plan
 
 Milestones, decisions and open questions live in `SPEC.md` (the source of truth; `✅` = decided, `💡` = proposal).
 The shape of it:
 
-- **M0 — Recon and oracle.** Create's real version coverage against Horizon's pinned 26.3; a dev Java instance
-  running it; a subsystem inventory (kinetics → processing → logistics → contraptions → schematics); the formulas
-  from public docs; the harness skeleton; the licence and asset audit; the first upstream API-gap issues.
+- **M0 — Recon and oracle.** Create's subsystem inventory (kinetics → processing → logistics → contraptions →
+  schematics); a dev NeoForge 1.21.1 instance running Create 6.0.10 as the oracle; the formulas — RPM sources,
+  stress costs, gear ratios, processing times — read from the source and cross-checked against the
+  [Create Wiki](https://create.fandom.com/); the harness skeleton; the asset-resolution design for the ARR
+  problem; the first upstream API-gap issues.
 - **M1 — Content parity (API 0.2).** `create-content.hmod`: Create's blocks and items in the `create` namespace
-  from vanilla templates, with models, textures, blockstates, recipes, loot and tags. Inert, but the world looks
+  from vanilla templates, with blockstates, models, textures, recipes, loot and tags resolved **externally** from
+  the player's own Create install (Create: Adapted's approach) or from assets we make. Inert, but the world looks
   like Create and crafting works.
 - **M2 — Kinetic core (API 0.3 server).** The shadow simulation: networks, rotation sources, shafts/cogs/gearboxes
   as propagation, RPM and stress, overstress and its consequences. Pure Rust maths in the sandbox, fuel-budgeted.
@@ -92,11 +112,12 @@ Ordering follows Horizon's own: content first, then server hooks, then whatever 
 ```
 create-port/
 ├── SPEC.md                 decisions, milestones, open questions — source of truth
+├── LICENSE                 MIT, carrying The Create Team's copyright notice for the translated code
 ├── docs/
-│   ├── clean-room.md       the observation rules above, in full
+│   ├── licence.md          the MIT/ARR split, asset-resolution options, attribution
 │   ├── recon/              M0: subsystem inventory, formulas, version coverage
 │   └── api-gaps.md         what Horizon lacks, and the upstream issues for it
-├── oracle/                 dev Java instance config, observation and parity harnesses (dev tooling: Python/Java fine)
+├── oracle/                 dev NeoForge 1.21.1 instance config, observation and parity harnesses (dev tooling: Python/Java fine)
 ├── mods/
 │   ├── create-content/     API 0.2 content mod — data only, no code
 │   └── create-kinetics/    API 0.3 server mod — Rust → WebAssembly

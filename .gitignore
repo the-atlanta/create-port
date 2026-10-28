@@ -24,6 +24,14 @@ oracle/captures/
 *.jar
 *.log
 
+# Create's ARR assets and third-party source/decompiler output must never be committed
+assets/create/
+create-src/
+decompiled/
+jadx-out/
+cfr-out/
+fernflower/
+
 # Editors / OS
 .idea/
 .vscode/
