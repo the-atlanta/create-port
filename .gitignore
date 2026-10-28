@@ -1,0 +1,31 @@
+# Rust / WASM
+target/
+**/*.rs.bk
+*.pdb
+*.hmod
+!mods/**/*.hmod
+
+# Horizon mod build output
+target/horizon-mod/
+
+# Dev tooling
+.venv/
+venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Oracle: the dev Java instance and captured game files (never commit game assets)
+oracle/run/
+oracle/instances/
+oracle/captures/
+*.jar
+*.log
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
