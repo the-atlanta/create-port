@@ -1,0 +1,15 @@
+create-port — Create, ported to Horizon
+Copyright (c) 2026 The Atlanta Collective
+
+This product includes code translated from Create, a Minecraft mod:
+
+  Create
+  Copyright (c) The Create Team / The Creators of Create
+  https://github.com/Creators-of-Create/Create
+  Code licensed under the MIT License; assets (src/main/resources/assets/)
+  are All Rights Reserved. See that repository's LICENSE.md.
+
+This repository contains none of Create's All Rights Reserved assets, and no
+build of it redistributes them. A shipped mod resolves those assets from the
+player's own installed copy of Create, following the model Create: Adapted
+publishes as `-public-external-assets`.

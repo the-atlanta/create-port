@@ -42,6 +42,9 @@ it on us. Two consequences we accept:
 
 Never commit Create's assets, its jars, or decompiler output into this repo (see `.gitignore`).
 
+`LICENSE` here is plain MIT so GitHub detects it; the attribution to The Create Team and the ARR carve-out for
+assets live in `NOTICE`.
+
 ## Why this is hard (read before writing code)
 
 Create is not a content mod. Its substance is a **simulation**: rotational power networks with RPM, stress and
@@ -112,7 +115,8 @@ Ordering follows Horizon's own: content first, then server hooks, then whatever 
 ```
 create-port/
 ├── SPEC.md                 decisions, milestones, open questions — source of truth
-├── LICENSE                 MIT, carrying The Create Team's copyright notice for the translated code
+├── LICENSE                 MIT (plain, so GitHub detects it)
+├── NOTICE                  attribution to The Create Team, and the ARR carve-out for assets
 ├── docs/
 │   ├── licence.md          the MIT/ARR split, asset-resolution options, attribution
 │   ├── recon/              M0: subsystem inventory, formulas, version coverage
